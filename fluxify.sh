@@ -20,17 +20,20 @@ for rel in "${files[@]}"; do
   src="$SRC_DIR/$rel"
   dest="$DEST_DIR/$rel"
   mkdir -p "$(dirname "$dest")"
-  cp -i "$src" "$dest"
+  # if the src contains 'fluxui' then copy without asking
+  if [[ "$src" == *"fluxui"* ]]; then
+    cp "$src" "$dest"
+  else
+    # if the user picks no - we skip copying but the script carries on
+    cp -i "$src" "$dest" || echo "Skipping $src"
+  fi
 done
 
 ( cd "$DEST_DIR" && npm install vite tailwindcss @tailwindcss/vite )
-( cd "$DEST_DIR" && composer require livewire/flux )
+( cd "$DEST_DIR" && composer require livewire/flux laravel/socialite socialiteproviders/keycloak)
 ( cd "$DEST_DIR" && php artisan flux:activate "${FLUX_USERNAME}" "${FLUX_LICENSE_KEY}" )
 
-HAS_SSO=$(grep -q "SSOController" "$DEST_DIR/routes/web.php" && echo "true" || echo "false")
-
-if [ "$HAS_SSO" = "false" ]; then
-echo "Remember to add the following to your routes/web.php:
+echo "## Remember to add the following to your routes/web.php:
 
 Route::middleware('guest')->group(function () {
     Route::redirect('/', '/login');
@@ -46,8 +49,39 @@ Route::get('/login/sso', [\App\Http\Controllers\Auth\SSOController::class, 'ssoL
 Route::get('/auth/callback', [\App\Http\Controllers\Auth\SSOController::class, 'handleProviderCallback'])->name('sso.callback');
 Route::post('/logout', [\App\Http\Controllers\Auth\SSOController::class, 'logout'])->name('auth.logout');
 Route::get('/logged-out', [\App\Http\Controllers\Auth\SSOController::class, 'loggedOut'])->name('logged_out');
+
+## And this to your config/services.php:
+
+    'keycloak' => [
+      'client_id' => env('KEYCLOAK_CLIENT_ID'),
+      'client_secret' => env('KEYCLOAK_CLIENT_SECRET'),
+      'redirect' => env('KEYCLOAK_REDIRECT_URI'),
+      'base_url' => env('KEYCLOAK_BASE_URL'),
+      'realms' => env('KEYCLOAK_REALM')
+    ],
+
+## And this to your app/Providers/AppServiceProvider.php:
+
+    public function boot(): void
+    {
+        // ...
+        Event::listen(function (\SocialiteProviders\Manager\SocialiteWasCalled \$event) {
+            \$event->extendSocialite('keycloak', \SocialiteProviders\Keycloak\Provider::class);
+        });
+    }
+
+## And this to your .env:
+KEYCLOAK_BASE_URL=https://
+KEYCLOAK_REALM=
+KEYCLOAK_CLIENT_ID=name-in-keycloak
+KEYCLOAK_CLIENT_SECRET=secret-in-keycloak
+KEYCLOAK_REDIRECT_URI=http://your-app/auth/callback
+
+SSO_ENABLED=true
+SSO_AUTOCREATE_NEW_USERS=false
+SSO_ALLOW_STUDENTS=false
+SSO_ADMINS_ONLY=false
 "
-fi
 
 echo
 echo "Done"
