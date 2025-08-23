@@ -15,6 +15,11 @@ fi
 # Bail if there are uncommitted changes in the destination directory
 ( cd "$DEST_DIR" && git status | grep -q 'working tree clean' ) || { echo "There are uncommitted changes in the destination directory. Please commit or stash them and re-run."; exit 1; }
 
+# Make a new SSOServiceProvider (we will overwrite it - but this will properly register it with laravel)
+if [ ! -f "$DEST_DIR/app/Providers/SSOServiceProvider.php" ]; then
+  ( cd "$DEST_DIR" && php artisan make:provider SSOServiceProvider )
+fi
+
 # Build array of files to copy
 mapfile -t files < <(cd "$SRC_DIR" && find . -type f ! -path "./.git/*" ! -name "$(basename "$0")" ! -name 'README.md' | sed 's|^\./||')
 
@@ -23,8 +28,8 @@ for rel in "${files[@]}"; do
   src="$SRC_DIR/$rel"
   dest="$DEST_DIR/$rel"
   mkdir -p "$(dirname "$dest")"
-  # if the src contains 'fluxui' then copy without asking
-  if [[ "$src" == *"fluxui"* ]]; then
+  # if the src contains 'fluxui' or 'SSOServiceProvider' then copy without asking
+  if [[ "$src" == *"fluxui"* || "$src" == *"SSOServiceProvider"* ]]; then
     cp "$src" "$dest"
   else
     # if the user picks no - we skip copying but the script carries on
@@ -42,22 +47,28 @@ if [ -f "$DEST_DIR/.gitignore" ]; then
   grep -q "auth.json" "$DEST_DIR/.gitignore" || echo "auth.json" >> "$DEST_DIR/.gitignore"
 fi
 
-echo "## Remember to add the following to your routes/web.php:
+upsert_env() {
+  local key=$1 val=$2 mainfile="$DEST_DIR/.env" examplefile="$DEST_DIR/.env.example"
+  if [ -f "$mainfile" ]; then
+    grep -q "^${key}=" "$mainfile" || echo "${key}=${val}" >> "$mainfile"
+  fi
+  if [ -f "$examplefile" ]; then
+    grep -q "^${key}=" "$examplefile" || echo "${key}=${val}" >> "$examplefile"
+  fi
+}
+upsert_env "KEYCLOAK_BASE_URL" "https://"
+upsert_env "KEYCLOAK_REALM" ""
+upsert_env "KEYCLOAK_CLIENT_ID" "name-in-keycloak"
+upsert_env "KEYCLOAK_CLIENT_SECRET" "secret-in-keycloak"
+upsert_env "KEYCLOAK_REDIRECT_URI" "http://your-app/auth/callback"
+upsert_env "SSO_ENABLED" "true"
+upsert_env "SSO_AUTOCREATE_NEW_USERS" "false"
+upsert_env "SSO_ALLOW_STUDENTS" "false"
+upsert_env "SSO_ADMINS_ONLY" "false"
 
-Route::middleware('guest')->group(function () {
-    Route::redirect('/', '/login');
+echo "## Remember to add the following near the top of your routes/web.php:
 
-    Route::get('/login', [\App\Http\Controllers\Auth\SSOController::class, 'login'])->name('login');
-    // Or as a Livewire component if you prefer
-    // Route::get('/login', App\Livewire\Login::class)->name('login');
-});
-
-// SSO specific routes
-Route::post('/login', [\App\Http\Controllers\Auth\SSOController::class, 'localLogin'])->name('login.local');
-Route::get('/login/sso', [\App\Http\Controllers\Auth\SSOController::class, 'ssoLogin'])->name('login.sso');
-Route::get('/auth/callback', [\App\Http\Controllers\Auth\SSOController::class, 'handleProviderCallback'])->name('sso.callback');
-Route::post('/logout', [\App\Http\Controllers\Auth\SSOController::class, 'logout'])->name('auth.logout');
-Route::get('/logged-out', [\App\Http\Controllers\Auth\SSOController::class, 'loggedOut'])->name('logged_out');
+require __DIR__ . '/sso-auth.php';
 
 ## And this to your config/services.php:
 
@@ -68,28 +79,6 @@ Route::get('/logged-out', [\App\Http\Controllers\Auth\SSOController::class, 'log
       'base_url' => env('KEYCLOAK_BASE_URL'),
       'realms' => env('KEYCLOAK_REALM')
     ],
-
-## And this to your app/Providers/AppServiceProvider.php:
-
-    public function boot(): void
-    {
-        // ...
-        Event::listen(function (\SocialiteProviders\Manager\SocialiteWasCalled \$event) {
-            \$event->extendSocialite('keycloak', \SocialiteProviders\Keycloak\Provider::class);
-        });
-    }
-
-## And this to your .env:
-KEYCLOAK_BASE_URL=https://
-KEYCLOAK_REALM=
-KEYCLOAK_CLIENT_ID=name-in-keycloak
-KEYCLOAK_CLIENT_SECRET=secret-in-keycloak
-KEYCLOAK_REDIRECT_URI=http://your-app/auth/callback
-
-SSO_ENABLED=true
-SSO_AUTOCREATE_NEW_USERS=false
-SSO_ALLOW_STUDENTS=false
-SSO_ADMINS_ONLY=false
 "
 
 echo
