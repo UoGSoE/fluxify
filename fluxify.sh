@@ -42,4 +42,6 @@ if [ -f "$DEST_DIR/.gitignore" ]; then
   grep -q "auth.json" "$DEST_DIR/.gitignore" || echo "auth.json" >> "$DEST_DIR/.gitignore"
 fi
 
-echo "Done"
+grep -q "boost" "$DEST_DIR/composer.json" || echo "Consider doing a \`composer require laravel/boost\` to add the laravel MCP for helping with flux/livewire."
+
+echo "Complete"
