@@ -15,11 +15,6 @@ fi
 # Bail if there are uncommitted changes in the destination directory
 ( cd "$DEST_DIR" && git status | grep -q 'working tree clean' ) || { echo "There are uncommitted changes in the destination directory. Please commit or stash them and re-run."; exit 1; }
 
-# Make a new SSOServiceProvider (we will overwrite it - but this will properly register it with laravel)
-if [ ! -f "$DEST_DIR/app/Providers/SSOServiceProvider.php" ]; then
-  ( cd "$DEST_DIR" && php artisan make:provider SSOServiceProvider )
-fi
-
 # Build array of files to copy
 mapfile -t files < <(cd "$SRC_DIR" && find . -type f ! -path "./.git/*" ! -name "$(basename "$0")" ! -name 'README.md' | sed 's|^\./||')
 
@@ -47,39 +42,4 @@ if [ -f "$DEST_DIR/.gitignore" ]; then
   grep -q "auth.json" "$DEST_DIR/.gitignore" || echo "auth.json" >> "$DEST_DIR/.gitignore"
 fi
 
-upsert_env() {
-  local key=$1 val=$2 mainfile="$DEST_DIR/.env" examplefile="$DEST_DIR/.env.example"
-  if [ -f "$mainfile" ]; then
-    grep -q "^${key}=" "$mainfile" || echo "${key}=${val}" >> "$mainfile"
-  fi
-  if [ -f "$examplefile" ]; then
-    grep -q "^${key}=" "$examplefile" || echo "${key}=${val}" >> "$examplefile"
-  fi
-}
-upsert_env "KEYCLOAK_BASE_URL" "https://"
-upsert_env "KEYCLOAK_REALM" ""
-upsert_env "KEYCLOAK_CLIENT_ID" "name-in-keycloak"
-upsert_env "KEYCLOAK_CLIENT_SECRET" "secret-in-keycloak"
-upsert_env "KEYCLOAK_REDIRECT_URI" "http://your-app/auth/callback"
-upsert_env "SSO_ENABLED" "true"
-upsert_env "SSO_AUTOCREATE_NEW_USERS" "false"
-upsert_env "SSO_ALLOW_STUDENTS" "false"
-upsert_env "SSO_ADMINS_ONLY" "false"
-
-echo "## Remember to add the following near the top of your routes/web.php:
-
-require __DIR__ . '/sso-auth.php';
-
-## And this to your config/services.php:
-
-    'keycloak' => [
-      'client_id' => env('KEYCLOAK_CLIENT_ID'),
-      'client_secret' => env('KEYCLOAK_CLIENT_SECRET'),
-      'redirect' => env('KEYCLOAK_REDIRECT_URI'),
-      'base_url' => env('KEYCLOAK_BASE_URL'),
-      'realms' => env('KEYCLOAK_REALM')
-    ],
-"
-
-echo
 echo "Done"
