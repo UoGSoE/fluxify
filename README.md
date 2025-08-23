@@ -1,6 +1,6 @@
 # Fluxify
 
-A Laravel project migration tool that automates the setup of Livewire Flux UI components and single-sign-on (SSO) authentication system.
+A Laravel project migration tool that automates the setup of Livewire Flux UI components.
 
 ## Prerequisites
 
@@ -29,7 +29,7 @@ Run the script and point it to your project directory:
 ## What It Does
 
 1. **Validates** Flux credentials and Laravel project
-2. **Copies** template, config, and sso files to your project
+2. **Copies** templates, config files to your project
 3. **Installs** required npm packages: vite, tailwindcss, @tailwindcss/vite
 4. **Installs** Livewire Flux
 5. **Activates** your Flux license
