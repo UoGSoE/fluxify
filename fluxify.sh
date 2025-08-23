@@ -33,6 +33,12 @@ done
 ( cd "$DEST_DIR" && composer require livewire/flux laravel/socialite socialiteproviders/keycloak)
 ( cd "$DEST_DIR" && php artisan flux:activate "${FLUX_USERNAME}" "${FLUX_LICENSE_KEY}" )
 
+# if .gitignore exists, add the following to it if they are not already there
+if [ -f "$DEST_DIR/.gitignore" ]; then
+  grep -q "fluxui" "$DEST_DIR/.gitignore" || echo "fluxui*" >> "$DEST_DIR/.gitignore"
+  grep -q "auth.json" "$DEST_DIR/.gitignore" || echo "auth.json" >> "$DEST_DIR/.gitignore"
+fi
+
 echo "## Remember to add the following to your routes/web.php:
 
 Route::middleware('guest')->group(function () {
