@@ -12,6 +12,9 @@ fi
 
 [[ -f "$DEST_DIR/artisan" ]] || { echo "${DEST_DIR} is not a Laravel project (artisan not found)."; exit 1; }
 
+# Bail if there are uncommitted changes in the destination directory
+( cd "$DEST_DIR" && git status | grep -q 'working tree clean' ) || { echo "There are uncommitted changes in the destination directory. Please commit or stash them and re-run."; exit 1; }
+
 # Build array of files to copy
 mapfile -t files < <(cd "$SRC_DIR" && find . -type f ! -path "./.git/*" ! -name "$(basename "$0")" | sed 's|^\./||')
 
