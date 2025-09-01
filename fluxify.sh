@@ -44,4 +44,5 @@ fi
 
 grep -q "boost" "$DEST_DIR/composer.json" || echo "Consider doing a \`composer require laravel/boost\` to add the laravel MCP for helping with flux/livewire."
 
+echo "If you use claude code - there are some helpful commands installed in the .claude/commands directory to help you migrate an existing frontend if this is an older project."
 echo "Complete"
