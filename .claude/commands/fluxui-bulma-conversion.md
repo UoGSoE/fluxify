@@ -3,6 +3,8 @@
   Context: I need to migrate a Laravel application from Bulma CSS framework to FluxUI (Livewire Flux). This app has FluxUI
   documentation available in fluxui-docs/ directory with the main guidance in fluxui-docs/GUIDENCE.md.
 
+  $ARGUMENTS
+
   Migration Approach:
   1. Start by reading fluxui-docs/GUIDENCE.md to understand FluxUI principles (simplicity, "We Style You Space", composition,
   etc.)
