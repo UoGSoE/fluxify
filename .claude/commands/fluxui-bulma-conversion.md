@@ -83,9 +83,12 @@
   - Layout feels balanced (not too wide or narrow)
   - Make sure all 'plain' blade templates (ie, not livewire components) are updated to use `<x-layouts.app>` rather than the older @extends and @section('content') syntax we used to use
 
-  Approach: Work through templates systematically, test functionality after each conversion, and iterate on spacing/sizing based
-   on visual feedback. Follow FluxUI documentation patterns exactly, and prioritize user experience improvements where possible.
-
+  Approach: Work through templates systematically, test functionality after each conversion, and iterate on spacing/sizing based on visual feedback. Follow FluxUI documentation patterns exactly, and prioritize user experience improvements where possible.
+  If there are more than five templates to convert then follow this process:
+  1. Get a list of all templates to convert
+  2. Create a file called 'TEMPLATES_TODO.md' in the root of the project
+  3. For each template to convert, add a markdown checkbox item with the filename next to it, eg `- [ ] resources/views/admin/course/partials/form.blade.php`
+  4. Use this TEMPLATES_TODO.md file to track which templates you need to convert - mark each off as you work through the process.  This will allow the user to see your progress and also to pick up if the process stops for any reason.
 ## MCP Tools
 If you have the 'laravel-boost` tool available - make thorough use of it to help you in your tasks.  It is written by the official Laravel team and will give you super-powers.  It also will give you up-to-date documentation for exactly the version of any laravel-related packages that you need such as laravel itself, fluxui, livewire and more!
 
