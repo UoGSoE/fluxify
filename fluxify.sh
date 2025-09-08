@@ -32,7 +32,7 @@ for rel in "${files[@]}"; do
   fi
 done
 
-( cd "$DEST_DIR" && npm install -D vite tailwindcss @tailwindcss/vite )
+( cd "$DEST_DIR" && npm install -D vite tailwindcss @tailwindcss/vite laravel-vite-plugin)
 ( cd "$DEST_DIR" && composer require livewire/flux laravel/socialite socialiteproviders/keycloak)
 ( cd "$DEST_DIR" && php artisan flux:activate "${FLUX_USERNAME}" "${FLUX_LICENSE_KEY}" )
 
