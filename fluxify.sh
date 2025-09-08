@@ -42,6 +42,10 @@ if [ -f "$DEST_DIR/.gitignore" ]; then
   grep -q "auth.json" "$DEST_DIR/.gitignore" || echo "auth.json" >> "$DEST_DIR/.gitignore"
 fi
 
+# find all blade templates that aren't already fluxified.
+grep -rL --include="*.blade.php" "flux" "$DEST_DIR/resources/views/" | sed 's/^/- [ ] /' > "$DEST_DIR/TEMPLATES_TODO.md"
+
+
 grep -q "boost" "$DEST_DIR/composer.json" || echo "Consider doing a \`composer require laravel/boost\` to add the laravel MCP for helping with flux/livewire."
 
 echo "If you use claude code - there are some helpful commands installed in the .claude/commands directory to help you migrate an existing frontend if this is an older project."
