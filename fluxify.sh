@@ -33,7 +33,7 @@ for rel in "${files[@]}"; do
 done
 
 ( cd "$DEST_DIR" && npm install -D vite tailwindcss @tailwindcss/vite laravel-vite-plugin)
-( cd "$DEST_DIR" && composer require livewire/flux laravel/socialite socialiteproviders/keycloak)
+( cd "$DEST_DIR" && composer require livewire/flux)
 ( cd "$DEST_DIR" && php artisan flux:activate "${FLUX_USERNAME}" "${FLUX_LICENSE_KEY}" )
 
 # if .gitignore exists, add the following to it if they are not already there
@@ -43,7 +43,7 @@ if [ -f "$DEST_DIR/.gitignore" ]; then
 fi
 
 # find all blade templates that aren't already fluxified.
-grep -rL --include="*.blade.php" "flux" "$DEST_DIR/resources/views/" | sed 's/^/- [ ] /' > "$DEST_DIR/TEMPLATES_TODO.md"
+#grep -rL --include="*.blade.php" "flux" "$DEST_DIR/resources/views/" | sed 's/^/- [ ] /' > "$DEST_DIR/TEMPLATES_TODO.md"
 
 
 grep -q "boost" "$DEST_DIR/composer.json" || echo "Consider doing a \`composer require laravel/boost\` to add the laravel MCP for helping with flux/livewire."

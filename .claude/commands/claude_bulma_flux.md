@@ -6,7 +6,8 @@ You are converting a Laravel application from Bulma CSS framework to FluxUI (Liv
 ## Conversion Process
 
 ### 1. Initial Setup
-- Read the overall guidence from the creator of FluxUI - ./fluxui-docs/GUIDENCE.md
+- Read the overall guidence from the creator of Livewire and FluxUI - `./FLUX_PATTERNS.md`
+- Read our notes on the conversion process - `./BULMA_TO_FLUX.md`
 - Read through 5 templates at a time from `TEMPLATES_TODO.md`
 - Use `mcp__laravel-boost__search-docs` tool to search for FluxUI component documentation
 - Check existing converted templates to understand established patterns
@@ -23,7 +24,7 @@ You are converting a Laravel application from Bulma CSS framework to FluxUI (Liv
 
 | Bulma | FluxUI |
 |-------|---------|
-| `<h3 class="title is-3">` | `<flux:heading size="2xl">` |
+| `<h3 class="title is-3">` | `<flux:heading size="xl">` |
 | `<p class="subtitle">` | `<flux:text size="lg">` |
 | `<div class="box">` | `<flux:card>` |
 | `<article class="message">` | `<flux:callout>` |
@@ -35,6 +36,8 @@ You are converting a Laravel application from Bulma CSS framework to FluxUI (Liv
 | `<div class="select">` | `<flux:select>` |
 | `<input class="input">` | `<flux:input>` |
 | `<textarea class="textarea">` | `<flux:textarea>` |
+| `<p>Some text</p>` | `<flux:text>Some text</flux:text>` |
+| `<a href="{{ route('home') }}">` | `<flux:link :href="route('home')">` |
 
 #### Form Field Conversions
 
@@ -62,14 +65,9 @@ Before:
 
 After:
 ```blade
-<flux:date-picker name="date" value="{{ $date->format('Y-m-d') }}" label="Date Label">
-    <x-slot name="trigger">
-        <flux:date-picker.input />
-    </x-slot>
-</flux:date-picker>
+<flux:date-picker name="date" value="{{ $date->format('Y-m-d') }}" label="Date Label" />
 ```
-
-Note: Change laravel model date format from `d/m/Y` to `Y-m-d` for ISO compatibility.
+Ensure the value you pass into <flux:date-picker> is already in ISO Y-m-d format (for example via old('date', optional($date)->format('Y-m-d')) inside the Blade template). Keep the underlying model/controller logic unchanged during this pass.
 
 ##### Email input
 If you come across an input which seems to be an email input, but is not using the email type attribute, then please change the type from 'text' to 'email'.
@@ -82,6 +80,19 @@ ALWAYS use `flux:select.option`, not HTML `<option>`:
     <flux:select.option value="val1" :selected="$model->field == 'val1'">Label 1</flux:select.option>
     <flux:select.option value="val2" :selected="$model->field == 'val2'">Label 2</flux:select.option>
 </flux:select>
+```
+
+##### Button variants
+
+All flux:button's should be left without any variants _apart from_ the main submit botton on a form which should use variant="primary".
+
+##### Dropdown/more menus
+
+When using a flux:dropdown the button that acts as the trigger should use
+a trailing chevron icon.  Eg:
+
+```blade
+<flux:button icon:trailing="chevron-down">More</flux:button>
 ```
 
 ##### Modern Blade Attribute Binding
@@ -108,10 +119,14 @@ Use:
 - Use `<flux:separator />` without manual margin classes when inside spaced containers
 - Use Tailwind spacing utilities (`mb-4`, `mt-6`, etc.) for additional spacing needs
 
+#### Typography
+- Use flux:text for all text
+- Use flux:heading for all headings - only the main page title (usually an h3 tag with 'heading is-3' classes) should use a size attribute of size="xl"
+- Ignore any bulma is-size-X classes - just use regular flux:text
+- Bulma has-text-weight-bold styles should use flux:text with variant="strong"
+
 #### Colors & Dark Mode
-- Replace Bulma color classes with Tailwind + dark mode support
-- `has-text-grey` → `text-zinc-600 dark:text-zinc-400`
-- `has-background-primary` → Use FluxUI component variants
+FluxUI has built-in colour mechanisms and dark mode support - there is no need to write out explicit tailwind classes for things like text or buttons.  Tailwind classes should be used more for layout, spacing, mobile-first, and places where there doesn't seem to be an obvious way to do something in the flux documentation (remember the laravel-boost tool - make sure to check!)
 
 #### Responsive Design
 - Replace Bulma responsive classes with Tailwind
@@ -126,14 +141,13 @@ Use:
 
 #### Buttons
 ```blade
+<flux:button>Default</flux:button>
 <flux:button variant="primary">Primary</flux:button>
-<flux:button variant="outline">Outline</flux:button>
-<flux:button variant="ghost">Ghost</flux:button>
-<flux:button variant="danger">Delete</flux:button>
 ```
 
 #### Callouts
 ```blade
+<flux:callout>Default</flux:callout>
 <flux:callout variant="info">Information</flux:callout>
 <flux:callout variant="success">Success</flux:callout>
 <flux:callout variant="warning">Warning</flux:callout>
@@ -163,15 +177,7 @@ Example:
 
 #### File Uploads
 ```blade
-<flux:field>
-    <flux:label>Upload File</flux:label>
-    <flux:input type="file" name="file" accept=".xlsx" />
-</flux:field>
-```
-
-Or with shorthand:
-```blade
-<flux:input type="file" name="file" accept=".xlsx" label="Upload File" />
+<flux:input label="Upload File" type="file" name="file" accept=".xlsx" />
 ```
 
 #### Icons
@@ -179,11 +185,6 @@ FluxUI uses Heroicons. Add icons to components (double check icon names using th
 ```blade
 <flux:button icon="plus">Add New</flux:button>
 <flux:input icon="search" />
-```
-
-#### Links styled as buttons
-```blade
-<flux:button href="{{ route('home') }}">Home</flux:button>
 ```
 
 ### 7. Quality Checklist
@@ -195,18 +196,16 @@ Before marking a template as complete, verify:
 - [ ] Select elements use `flux:select.option`
 - [ ] Modern blade attribute binding used (`:selected`, `:disabled`, etc.)
 - [ ] Proper spacing wrapper applied (`<div class="flex-1 space-y-6">`)
-- [ ] Dark mode classes added where appropriate
 - [ ] Component variants properly applied
-- [ ] Vue.js functionality preserved (if applicable)
+- [ ] Vue.js markup/tags preserved (if applicable)
+- [ ] Livewire component markup/tags preserved (if applicable)
 
 ### 8. Testing Approach
 
 After conversion:
 1. Check visual appearance matches intended design
-2. Verify form submissions work correctly
-3. Test date picker functionality
-4. Ensure responsive behavior works
-5. Check dark mode appearance
+2. Test date picker functionality
+3. Ensure responsive behavior works
 
 ### 9. Documentation Resources
 
@@ -276,25 +275,22 @@ When working through conversions:
 ### After (FluxUI):
 ```blade
 <x-layouts.app>
-    <div class="max-w-2xl">
-        <flux:heading size="2xl" class="mb-6">Create User</flux:heading>
+    <div class="max-w-xl">
+        <flux:heading size="xl">Create User</flux:heading>
         
-        <form method="POST" action="{{ route('user.store') }}">
+        <form method="POST" action="{{ route('user.store') }}" class="mt-6">
             @csrf
             
             <div class="flex-1 space-y-6">
                 <flux:input name="name" type="text" required label="Name" />
                 
+                <!-- if the original template used wire:model, then you do not need to deal with the :selected -->
                 <flux:select name="role" label="Role">
                     <flux:select.option value="admin" :selected="$user->role == 'admin'">Admin</flux:select.option>
                     <flux:select.option value="user" :selected="$user->role == 'user'">User</flux:select.option>
                 </flux:select>
                 
-                <flux:date-picker name="start_date" value="{{ old('start_date', now()->format('Y-m-d')) }}" label="Start Date">
-                    <x-slot name="trigger">
-                        <flux:date-picker.input />
-                    </x-slot>
-                </flux:date-picker>
+                <flux:date-picker name="start_date" value="{{ old('start_date', now()->format('Y-m-d')) }}" label="Start Date" />
                 
                 <flux:separator />
                 
@@ -304,6 +300,8 @@ When working through conversions:
     </div>
 </x-layouts.app>
 ```
+
+Note: if the new template will be a livewire component, you do not need the <x-layouts.app> wrapper - livewire components extend the base layout by default.
 
 ---
 
