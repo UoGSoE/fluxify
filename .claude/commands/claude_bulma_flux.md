@@ -86,6 +86,18 @@ ALWAYS use `flux:select.option`, not HTML `<option>`:
 
 All flux:button's should be left without any variants _apart from_ the main submit botton on a form which should use variant="primary".
 
+##### Links
+
+Any link that is not a button should use the flux:link component.
+Before:
+```blade
+<a href="{{ route('home') }}">Home</a>
+```
+After:
+```blade
+<flux:link :href="route('home')">Home</flux:link>
+```
+
 ##### Dropdown/more menus
 
 When using a flux:dropdown the button that acts as the trigger should use
