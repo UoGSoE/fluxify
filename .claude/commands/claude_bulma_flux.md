@@ -30,7 +30,7 @@ You are converting a Laravel application from Bulma CSS framework to FluxUI (Liv
 | `<article class="message">` | `<flux:callout>` |
 | `<button class="button">` | `<flux:button>` |
 | `<hr>` | `<flux:separator />` |
-| `<div class="columns">` | `<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">` |
+| `<div class="columns">` | `<div class="grid grid-cols-1 md:grid-cols-2 gap-8">` |
 | `<div class="column">` | `<div>` |
 | `<div class="field">` | Use FluxUI shorthand (see below) |
 | `<div class="select">` | `<flux:select>` |
@@ -154,7 +154,7 @@ FluxUI has built-in colour mechanisms and dark mode support - there is no need t
 <flux:callout variant="danger">Error</flux:callout>
 ```
 
-### 5. Vue.js Components
+### 5. Vue.js and Livewire Components
 When converting Vue.js components with Bulma:
 - Keep Vue directives (v-if, v-for, @click, etc.)
 - Replace Bulma classes with FluxUI components
@@ -172,6 +172,29 @@ Example:
     @{{ message }}
 </flux:callout>
 ```
+
+When converting Livewire components:
+- Keep blade directives (@if, @foreach, @click, etc.)
+- Replace Bulma classes with FluxUI components
+- Maintain reactivity patterns
+
+Example:
+```blade
+<!-- Before -->
+<div class="field">
+  <label class="label">Name</label>
+  <div class="control">
+    <input wire:model="name" class="input" type="text" placeholder="Text input">
+  </div>
+  @error('name') <p class="help is-danger">{{ $message }}</p> @enderror
+</div>
+```
+
+<!-- After -->
+```blade
+<flux:input wire:model="name" label="Name" type="text" placeholder="Text input" />
+```
+Note: flux:input takes care of showing errors automatically.
 
 ### 6. Common Patterns to Remember
 
