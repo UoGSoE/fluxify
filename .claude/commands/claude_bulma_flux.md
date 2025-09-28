@@ -216,7 +216,7 @@ Note: flux:input takes care of showing errors automatically.
 ```
 
 #### Icons
-FluxUI uses Heroicons. Add icons to components (double check icon names using the mcp__laravel-boost__search-docs tool for flux):
+FluxUI uses Heroicons. Add icons to components (double check icon names using the mcp__laravel-boost__search-docs tool for flux).  There is also a text file in the project called `heroicon-list.txt` if you want a very quick check of the complete list.
 ```blade
 <flux:button icon="plus">Add New</flux:button>
 <flux:input icon="search" />
