@@ -8,7 +8,7 @@ You are converting a Laravel application from Bulma CSS framework to FluxUI (Liv
 ### 1. Initial Setup
 - Read the overall guidence from the creator of Livewire and FluxUI - `./FLUX_PATTERNS.md`
 - Read our notes on the conversion process - `./BULMA_TO_FLUX.md`
-- Read through 5 templates at a time from `TEMPLATES_TODO.md`
+- Read through 7 templates at a time from `TEMPLATES_TODO.md`
 - Use `mcp__laravel-boost__search-docs` tool to search for FluxUI component documentation
 - Check existing converted templates to understand established patterns
 - Always look at `resources/views/components/layouts/app.blade.php` to understand the base layout structure
@@ -80,6 +80,73 @@ ALWAYS use `flux:select.option`, not HTML `<option>`:
     <flux:select.option value="val1" :selected="$model->field == 'val1'">Label 1</flux:select.option>
     <flux:select.option value="val2" :selected="$model->field == 'val2'">Label 2</flux:select.option>
 </flux:select>
+```
+
+##### Tables
+
+Use the flux:table component to convert tables.
+```blade
+<flux:table :paginate="$this->orders">
+    <flux:table.columns>
+        <flux:table.column>Customer</flux:table.column>
+        <flux:table.column sortable :sorted="$sortBy === 'date'" :direction="$sortDirection" wire:click="sort('date')">Date</flux:table.column>
+        <flux:table.column sortable :sorted="$sortBy === 'status'" :direction="$sortDirection" wire:click="sort('status')">Status</flux:table.column>
+        <flux:table.column sortable :sorted="$sortBy === 'amount'" :direction="$sortDirection" wire:click="sort('amount')">Amount</flux:table.column>
+    </flux:table.columns>
+
+    <flux:table.rows>
+        @foreach ($this->orders as $order)
+            <flux:table.row :key="$order->id">
+                <flux:table.cell class="flex items-center gap-3">
+                    <flux:avatar size="xs" src="{{ $order->customer_avatar }}" />
+
+                    {{ $order->customer }}
+                </flux:table.cell>
+
+                <flux:table.cell class="whitespace-nowrap">{{ $order->date }}</flux:table.cell>
+
+                <flux:table.cell>
+                    <flux:badge size="sm" :color="$order->status_color" inset="top bottom">{{ $order->status }}</flux:badge>
+                </flux:table.cell>
+
+                <flux:table.cell variant="strong">{{ $order->amount }}</flux:table.cell>
+
+                <flux:table.cell>
+                    <flux:button variant="ghost" size="sm" icon="ellipsis-horizontal" inset="top bottom"></flux:button>
+                </flux:table.cell>
+            </flux:table.row>
+        @endforeach
+    </flux:table.rows>
+</flux:table>
+```
+
+##### Modals
+
+Existing modals should be converted to flux:modal components.  The modal trigger `name` attribute should match the name of the modal.
+
+```blade
+<flux:modal.trigger name="edit-profile">
+    <flux:button>Edit profile</flux:button>
+</flux:modal.trigger>
+
+<flux:modal name="edit-profile" class="md:w-96">
+    <div class="space-y-6">
+        <div>
+            <flux:heading size="lg">Update profile</flux:heading>
+            <flux:text class="mt-2">Make changes to your personal details.</flux:text>
+        </div>
+
+        <flux:input label="Name" placeholder="Your name" />
+
+        <flux:input label="Date of birth" type="date" />
+
+        <div class="flex">
+            <flux:spacer />
+
+            <flux:button type="submit" variant="primary">Save changes</flux:button>
+        </div>
+    </div>
+</flux:modal>
 ```
 
 ##### Button variants
@@ -220,7 +287,33 @@ FluxUI uses Heroicons. Add icons to components (double check icon names using th
 ```blade
 <flux:button icon="plus">Add New</flux:button>
 <flux:input icon="search" />
+<flux:icon.user-circle />
 ```
+
+#### Blade guards
+Some of the blade templates will use `@if (Auth::user()->isJwncStaff())`.  Please replace those with `@jwncstaff` and change the matching `@endif` to be `@endjwncstaff` .
+
+#### Conditional Styling
+Because of the way Blade and FluxUI components work, you should avoid using @if blocks in the following case:
+```blade
+{{-- This breaks the component --}}
+@if ($process->latestRun()->created_at->diffInDays(now()) > $process->frequency)
+    <flux:text class="text-red-600 dark:text-red-400">
+@else
+    <flux:text>
+@endif
+    {{ $process->latestRun()->created_at }}
+    ({{ $process->latestRun()->created_at->diffForHumans() }})
+</flux:text>
+```
+
+Instead, use the following style:
+```blade
+{{-- This works --}}
+<flux:text :color="$process->latestRun()->created_at->diffInDays(now()) > $process->frequency ? 'red' : 'default'">
+    {{ $process->latestRun()->created_at }}
+    ({{ $process->latestRun()->created_at->diffForHumans() }})
+</flux:text>
 
 ### 7. Quality Checklist
 
@@ -259,10 +352,10 @@ Key search terms:
 ### 10. File Organization
 
 When working through conversions:
-1. Read 5 templates from TEMPLATES_TODO.md
+1. Read 7 templates from TEMPLATES_TODO.md
 2. Convert each template completely
 3. Mark completed templates with [x] in TEMPLATES_TODO.md
-4. After doing 5 templates, stop and wait for feedback from the user
+4. After doing 7 templates, stop and wait for feedback from the user
 
 ## Example Full Conversion
 
@@ -341,4 +434,8 @@ Note: if the new template will be a livewire component, you do not need the <x-l
 ---
 
 This guide should be followed systematically for each template conversion to ensure consistency and completeness.
+
+Remember: you have the laravel boost tool to help you find the right documentation for any component you need to convert.  Make sure to use it - especially for components you have not seen before.
+
+
 

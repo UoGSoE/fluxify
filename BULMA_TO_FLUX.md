@@ -1,4 +1,4 @@
-# Playbook A — Bulma/Blade ➜ FluxUI + Tailwind (First Pass, No Livewire) — Revised
+# Playbook A — Bulma/Blade ➜ FluxUI + Tailwind (First Pass, No new Livewire or VueJS) — Revised
 
 **Goal:** Replace Bulma markup and styles with FluxUI components + Tailwind utilities while preserving existing Blade/Vue/Livewire code **verbatim**. This is a mechanical UI pass. **Do not** introduce new Livewire or change/patch any JS behaviour apart from the case of the flux:date-picker (as mentioned - the format the date value expects has changed). Vue directives remain in the templates, and Vue is **not initialised** in this pass so broken interactivity reveals where behaviour exists.
 
@@ -11,6 +11,8 @@
 * **Non‑disruptive to logic:** Do not change controllers, routes, requests, or any JS data flows.
 * **Consistency:** Use Flux components and Tailwind spacing/typography.
 * **A11y by design:** Use Flux labels/props to keep controls properly labelled.
+* **Keep it simple:** Keep your code simple and readable.  Follow Laravel and Livewire conventions.  Use Eloquent models, query scopes and relations rather than using SQL syntax, joins, sub-selects etc.  The developers like simple, clean code which they could read aloud and have it make sense to a stake-holder rather than 'clever' code.
+* **Data Size:** Although the apps are important to the organisation, the data they will be operating on is not.  You don't have to worry about SQL performance or a bit of memory.  Simplicity and readability always trump any concerns.
 
 ---
 
@@ -125,4 +127,7 @@
 ## 11) Ready‑to‑Use System Prompt (Pass A)
 
 ** You are performing a first‑pass UI migration. ** Replace all Bulma markup/classes with FluxUI + Tailwind in Blade templates. Preserve all existing Vue directives and code verbatim and **do not initialise Vue** in this pass. Do not add wrappers or Alpine shims to make things work; broken interactions are expected and help discovery later. Use Flux component shorthand for fields; convert **every date field** (including `type="date"` and Pikaday inputs) to `<flux:date-picker>` with ISO `Y-m-d`. Use `<flux:select>` with `<flux:select.option>` only and modern Blade bindings (`:selected`, `:disabled`, `:required`). Ensure a single root element, consistent width constraints, spacing wrappers, and responsive Tailwind classes, with accessible labels. Do not modify controllers, routes, or any JS behaviour. Commit small, focused diffs and run the checklist before marking complete.
+
+**CRITICAL:** Do not introduce @php blade blocks in templates.  Always defer to the laravel and livewire conventions of 
+properties, models, attributes on the component.
 
