@@ -366,7 +366,40 @@ When working through conversions:
 @section('content')
 <div class="columns">
     <div class="column">
-        <h3 class="title is-3">Create User</h3>
+        <div class="level">
+            <div class="level-left">
+                <div class="level-item">
+                    <h3 class="title is-3">Create User</h3>
+                </div>
+            </div>
+            <div class="level-right">
+                <div class="level-item">
+                    <div class="dropdown is-pulled-right">
+                        <div class="dropdown-trigger">
+                            <button class="button" aria-haspopup="true" aria-controls="dropdown-menu">
+                                <span>More...</span>
+                                <span class="icon is-small">
+                                    <i class="fa fa-angle-down" aria-hidden="true"></i>
+                                </span>
+                            </button>
+                        </div>
+
+                        <div class="dropdown-menu" id="dropdown-menu" role="menu">
+                            <div class="dropdown-content">
+                                <a href="{{ route('dryetch.equipment.create') }}" class="dropdown-item">
+                                    Add new equipment
+                                </a>
+                                <hr class="dropdown-divider">
+                                <a href="{{ route('dryetch.bookings.completed') }}" class="dropdown-item">
+                                    Completed bookings
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <form method="POST" action="{{ route('user.store') }}">
             @csrf
             <div class="field">
@@ -404,8 +437,17 @@ When working through conversions:
 ```blade
 <x-layouts.app>
     <div class="max-w-xl">
-        <flux:heading size="xl">Create User</flux:heading>
-        
+        <div class="flex justify-between items-center">
+            <flux:heading size="xl">Create User</flux:heading>
+            <flux:dropdown>
+                <flux:button icon:trailing="chevron-down">More...</flux:button>
+                <flux:navmenu>        
+                    <flux:navmenu.item :href="route('dryetch.equipment.create')" icon="plus">Add new equipment</flux:navmenu.item>        
+                    <flux:menu.separator />
+                    <flux:navmenu.item :href="route('dryetch.bookings.completed')" icon="check">Completed bookings</flux:navmenu.item>        
+                </flux:navmenu>
+            </flux:dropdown>
+        </div>
         <form method="POST" action="{{ route('user.store') }}" class="mt-6">
             @csrf
             
@@ -436,6 +478,7 @@ Note: if the new template will be a livewire component, you do not need the <x-l
 This guide should be followed systematically for each template conversion to ensure consistency and completeness.
 
 Remember: you have the laravel boost tool to help you find the right documentation for any component you need to convert.  Make sure to use it - especially for components you have not seen before.
+
 
 
 
