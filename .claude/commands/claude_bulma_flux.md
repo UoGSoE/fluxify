@@ -122,14 +122,14 @@ Use the flux:table component to convert tables.
 
 ##### Modals
 
-Existing modals should be converted to flux:modal components.  The modal trigger `name` attribute should match the name of the modal.
+Existing modals should be converted to flux:modal components using the 'flyout' variant (this makes the modal 'fly' in and out of the right side of the page).  The modal trigger `name` attribute should match the name of the modal.
 
 ```blade
 <flux:modal.trigger name="edit-profile">
     <flux:button>Edit profile</flux:button>
 </flux:modal.trigger>
 
-<flux:modal name="edit-profile" class="md:w-96">
+<flux:modal name="edit-profile" class="md:w-96" variant="flyout">
     <div class="space-y-6">
         <div>
             <flux:heading size="lg">Update profile</flux:heading>
@@ -356,6 +356,13 @@ When working through conversions:
 2. Convert each template completely
 3. Mark completed templates with [x] in TEMPLATES_TODO.md
 4. After doing 7 templates, stop and wait for feedback from the user
+
+### 11. General Tips
+ 
+- Do not add custom css classes for colour/styling - flux components have this covered and it will make the visual style incinsistent if you mess with them.
+- Do use custom css classes for layout and spacing.
+- It is **perfectly ok** to take a moment and ask the user for advice or help.  They are experts in these applications and how they are used - it is much more preferable to the user that you ask rather than them finding you've gone off in the wrong direction.
+- If you ask the user for help - you can add notes for yourself to the DEVELOPER_NOTES.md file.
 
 ## Example Full Conversion
 
